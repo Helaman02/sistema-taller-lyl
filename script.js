@@ -1,9 +1,52 @@
+// === PEGA ESTO HASTA ARRIBA DE TU SCRIPT.JS ===
+const comprimirImagen = (archivo, maxResolucion = 1024, calidad = 0.7) => {
+  return new Promise((resolve, reject) => {
+    if (!archivo || !archivo.type.startsWith('image/')) {
+      resolve(archivo);
+      return;
+    }
+    const reader = new FileReader();
+    reader.readAsDataURL(archivo);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let ancho = img.width;
+        let alto = img.height;
+        if (ancho > alto && ancho > maxResolucion) {
+          alto *= maxResolucion / ancho;
+          ancho = maxResolucion;
+        } else if (alto > maxResolucion) {
+          ancho *= maxResolucion / alto;
+          alto = maxResolucion;
+        }
+        canvas.width = ancho;
+        canvas.height = alto;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, ancho, alto);
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const archivoComprimido = new File([blob], archivo.name, {
+              type: 'image/jpeg',
+              lastModified: Date.now(),
+            });
+            resolve(archivoComprimido);
+          } else {
+            reject(new Error('Error al comprimir la imagen'));
+          }
+        }, 'image/jpeg', calidad);
+      };
+    };
+    reader.onerror = (error) => reject(error);
+  });
+};
+// ===============================================
+
 /* =========================================================
    1) CONFIGURACIÓN DE SUPABASE
-   Reemplaza estos dos valores con los de tu propio proyecto
-   (Supabase → Project Settings → API).
    ========================================================= */
-const SUPABASE_URL = "https://riirajoptvdcosrvpoug.supabase.co";       // ej: https://abcxyz.supabase.co
+const SUPABASE_URL = "https://riirajoptvdcosrvpoug.supabase.co";       
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJpaXJham9wdHZkY29zcnZwb3VnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk1NjY0NTcsImV4cCI6MjEwNTE0MjQ1N30.xq2i26iv3RW9w89XmIUodMxjq3eJPg7z2USvByxUjP8";
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -21,7 +64,7 @@ document.getElementById("btnCerrarSesion")?.addEventListener("click", () => {
   supabaseClient.auth.signOut().then(() => (window.location.href = "login.html"));
 });
 
-/* Nombre del bucket de Storage para las fotos (opcional, ver README) */
+/* Nombre del bucket de Storage para las fotos */
 const STORAGE_BUCKET = "fotos-equipos";
 
 /* =========================================================
@@ -53,7 +96,7 @@ sections.forEach((section) => observer.observe(section));
 if (steps[0]) steps[0].classList.add("is-active");
 
 /* =========================================================
-   4) ENVÍO DEL FORMULARIO
+   4) ENVÍO DEL FORMULARIO Y SUBIDA DE FOTOS COMPRIMIDAS
    ========================================================= */
 const form = document.getElementById("formOrden");
 const btnSubmit = document.getElementById("btnSubmit");
@@ -67,7 +110,19 @@ function setStatus(message, type) {
 async function subirFotos(files) {
   if (!files || files.length === 0) return [];
   const urls = [];
-  for (const file of files) {
+  
+  for (const fileOriginal of files) {
+    let file = fileOriginal; // Variable que usaremos para subir
+
+    // --- ¡AQUÍ ESTÁ LA MAGIA DEL COMPRESOR! ---
+    try {
+      // Intentamos comprimir la foto antes de subirla
+      file = await comprimirImagen(fileOriginal);
+    } catch (e) {
+      console.warn("Error al comprimir, se intentará subir la original:", e);
+    }
+    // ------------------------------------------
+
     const path = `${numeroTicket}/${Date.now()}-${file.name}`;
     const { error } = await supabaseClient.storage.from(STORAGE_BUCKET).upload(path, file);
     if (error) {

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Accesorios L&amp;L — Orden de recepción</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="pantallaCarga" class="pantalla-carga">
+  <video id="videoIntro" src="intro.mp4" autoplay muted playsinline></video>
+</div>
+
+<div class="ticket">
+
+  <!-- ===== Panel lateral ===== -->
+  <aside class="ticket__stub">
+    <div class="brand">
+      <img src="logo.jpg" alt="Logo Accesorios L&L" style="width: 45px; height: 45px; object-fit: contain; background: white; border-radius: 8px; padding: 2px;">
+      <div class="brand__name">
+        <strong>Accesorios L&amp;L</strong>
+        <span>Recepción de equipos</span>
+      </div>
+    </div>
+
+    <a href="panel-tecnico.html" style="display: block; background: #0f1c2e; color: #ffffff; text-align: center; text-decoration: none; padding: 10px; border-radius: 8px; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 0.9rem; margin: 15px 0 8px;">
+      ⚙️ Ir al Panel de Taller
+    </a>
+    <a href="panel-cobros.html" style="display: block; background: #1b7a5b; color: #ffffff; text-align: center; text-decoration: none; padding: 10px; border-radius: 8px; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 0.9rem; margin: 0 0 8px;">
+      💵 Ir al Panel de Cobros
+    </a>
+    <a href="panel-kpis.html" style="display: block; background: #1d3450; color: #ffffff; text-align: center; text-decoration: none; padding: 10px; border-radius: 8px; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 0.9rem; border: 1px solid #3a5977; margin: 0 0 15px;">
+      📊 Ver Indicadores (KPIs)
+    </a>
+    <button type="button" id="btnCerrarSesion" style="display: block; width: 100%; background: none; color: #9fadb6; text-align: center; padding: 8px; border-radius: 8px; font-family: 'Inter', sans-serif; font-weight: 500; font-size: 0.82rem; border: none; cursor: pointer; margin: 0 0 15px;">
+      Cerrar sesión
+    </button>
+
+    <p class="stub__note">
+      Completa los datos del cliente y del equipo antes de iniciar el
+      diagnóstico. Esta orden queda guardada como comprobante de ingreso.
+    </p>
+
+    <nav class="steps" aria-label="Secciones del formulario">
+      <a href="#seccion-cliente" class="steps__item" data-step="1">
+        <span class="steps__dot">1</span>
+        <span class="steps__label">Datos del cliente</span>
+      </a>
+      <a href="#seccion-equipo" class="steps__item" data-step="2">
+        <span class="steps__dot">2</span>
+        <span class="steps__label">Datos del equipo</span>
+      </a>
+    </nav>
+
+    <div class="stub__ticket-no">
+      <span>N.º de orden</span>
+      <strong id="numeroTicket">LL-000000</strong>
+    </div>
+  </aside>
+
+  <!-- ===== Formulario ===== -->
+  <main class="ticket__body">
+    <form id="formOrden" novalidate>
+
+      <section id="seccion-cliente" class="section" data-section="1">
+        <header class="section__head">
+          <span class="section__index">01</span>
+          <div>
+            <h2>Datos del cliente</h2>
+            <p>Para identificar al propietario y poder contactarlo.</p>
+          </div>
+        </header>
+
+        <div class="field">
+          <label for="nombreCliente">Nombre completo / Razón social <em>*</em></label>
+          <input type="text" id="nombreCliente" name="nombreCliente" required autocomplete="name">
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="telefono">Teléfono / WhatsApp <em>*</em></label>
+            <input type="tel" id="telefono" name="telefono" required autocomplete="tel" placeholder="Para avisos de cotización y listo">
+          </div>
+          <div class="field">
+            <label for="correo">Correo electrónico</label>
+            <input type="email" id="correo" name="correo" autocomplete="email" placeholder="Para órdenes y facturas digitales">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="direccion">Dirección</label>
+          <input type="text" id="direccion" name="direccion" placeholder="Útil si ofrecen servicio a domicilio">
+        </div>
+      </section>
+
+      <section id="seccion-equipo" class="section" data-section="2">
+        <header class="section__head">
+          <span class="section__index">02</span>
+          <div>
+            <h2>Datos del equipo de cómputo</h2>
+            <p>Todo lo necesario para diagnosticar sin confusiones.</p>
+          </div>
+        </header>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="tipoEquipo">Tipo de equipo <em>*</em></label>
+            <select id="tipoEquipo" name="tipoEquipo" required>
+              <option value="" disabled selected>Selecciona una opción</option>
+              <option value="Laptop">Laptop</option>
+              <option value="Computadora de escritorio (PC)">Computadora de escritorio (PC)</option>
+              <option value="Servidor">Servidor</option>
+              <option value="Impresora">Impresora</option>
+              <option value="Otro">Otro</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="marcaModelo">Marca y modelo <em>*</em></label>
+            <input type="text" id="marcaModelo" name="marcaModelo" required placeholder="Ej. HP ProBook 440 G9, Dell Inspiron">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="numeroSerie">Número de serie / Etiqueta de servicio</label>
+          <input type="text" id="numeroSerie" name="numeroSerie" class="mono" placeholder="Indispensable para evitar confusiones de piezas">
+        </div>
+
+        <div class="field">
+          <label for="especificaciones">Especificaciones técnicas básicas</label>
+          <textarea id="especificaciones" name="especificaciones" rows="2" placeholder="Procesador, memoria RAM, almacenamiento (HDD/SSD)"></textarea>
+        </div>
+
+        <div class="field">
+          <label for="contrasena">Contraseñas o PIN</label>
+          <input type="text" id="contrasena" name="contrasena" class="mono" placeholder="Credenciales de inicio de sesión, o escribe “sin contraseña”">
+        </div>
+
+        <fieldset class="field">
+          <legend>Accesorios recibidos</legend>
+          <div class="checks">
+            <label class="check"><input type="checkbox" name="accesorios" value="Cargador"> Cargador</label>
+            <label class="check"><input type="checkbox" name="accesorios" value="Maletín"> Maletín</label>
+            <label class="check"><input type="checkbox" name="accesorios" value="Mouse"> Mouse</label>
+            <label class="check"><input type="checkbox" name="accesorios" value="Cable de poder"> Cable de poder</label>
+            <label class="check"><input type="checkbox" name="accesorios" value="Dongle USB"> Dongle USB</label>
+          </div>
+          <input type="text" id="accesoriosOtro" name="accesoriosOtro" placeholder="Otro accesorio (opcional)">
+        </fieldset>
+
+        <div class="field">
+          <label for="descripcionFalla">Motivo de ingreso / Falla reportada <em>*</em></label>
+          <textarea id="descripcionFalla" name="descripcionFalla" rows="2" required placeholder="¿Qué problema reporta el cliente? Ej. No enciende, pantalla azul, está muy lenta..."></textarea>
+        </div>
+
+        <div class="field">
+          <label for="estadoFisico">Estado físico de recepción</label>
+          <textarea id="estadoFisico" name="estadoFisico" rows="2" placeholder="Rayones, golpes, pantalla astillada, teclas faltantes"></textarea>
+        </div>
+
+        <div class="field">
+          <label for="fotos">Fotos del estado del equipo (respaldo)</label>
+          <input type="file" id="fotos" name="fotos" accept="image/*" capture="environment" multiple>
+        </div>
+      </section>
+
+      <div class="submit-row">
+        <p id="formStatus" class="form-status" role="status" aria-live="polite"></p>
+        <button type="submit" id="btnSubmit">Registrar orden</button>
+      </div>
+
+    </form>
+  </main>
+</div>
+
+<div id="modalExito" class="modal-exito">
+  <div class="modal-exito__content">
+    <video id="videoExito" src="maquito.mp4" playsinline></video>
+    <h2>¡Registro hecho correctamente!</h2>
+    <button id="btnCerrarModal" type="button">Aceptar</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

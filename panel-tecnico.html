@@ -114,6 +114,13 @@
   .detail__head h2{margin:0 0 4px;font-size:1.4rem;}
   .detail__head .sub{color:var(--muted);font-size:.9rem;}
   .detail__folio{font-family:'JetBrains Mono',monospace;font-size:.85rem;color:var(--muted);}
+  .btn-ticket{
+    background:var(--navy);color:#fff;white-space:nowrap;
+    padding:9px 14px;border-radius:8px;font-family:'Space Grotesk',sans-serif;
+    font-weight:600;font-size:.82rem;border:none;cursor:pointer;
+  }
+  .btn-ticket:hover{background:var(--navy-2);}
+  .detail__acciones{display:flex;flex-direction:column;align-items:flex-end;gap:8px;}
 
   .client-strip{
     display:flex;
@@ -272,6 +279,8 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="ticket-pdf.js"></script>
 <script src="panel-tecnico.js"></script>
 </body>
 </html>

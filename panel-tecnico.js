@@ -1,8 +1,4 @@
-  /* =========================================================
-   Usa las mismas credenciales que script.js del formulario
-   de recepción (mismo proyecto de Supabase).
-   ========================================================= */
-const SUPABASE_URL = "https://riirajoptvdcosrvpoug.supabase.co";
+ const SUPABASE_URL = "https://riirajoptvdcosrvpoug.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJpaXJham9wdHZkY29zcnZwb3VnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk1NjY0NTcsImV4cCI6MjEwNTE0MjQ1N30.xq2i26iv3RW9w89XmIUodMxjq3eJPg7z2USvByxUjP8";
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -153,7 +149,10 @@ function renderDetalle() {
         <h2>${o.nombre_cliente || "(sin nombre)"}</h2>
         <span class="sub">${o.tipo_equipo || ""} · ${o.marca_modelo || ""}</span>
       </div>
-      <span class="detail__folio">${o.numero_ticket || ""}</span>
+      <div class="detail__acciones">
+        <span class="detail__folio">${o.numero_ticket || ""}</span>
+        <button type="button" class="btn-ticket" id="btnGenerarTicket">📄 Abrir PDF</button>
+      </div>
     </div>
 
     <div class="client-strip">
@@ -273,6 +272,9 @@ function renderDetalle() {
 
   document.getElementById("formFlujo").addEventListener("submit", guardarFlujo);
   document.getElementById("formRepuesto").addEventListener("submit", agregarRepuesto);
+  document.getElementById("btnGenerarTicket").addEventListener("click", () => {
+    generarTicketPDF(o);
+  });
   document.getElementById("estadoReparacion").addEventListener("change", (e) => {
     if (e.target.value === "Entregado") {
       const localNow = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);

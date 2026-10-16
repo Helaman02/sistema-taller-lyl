@@ -181,11 +181,14 @@
   <div class="modal-exito__content">
     <video id="videoExito" src="maquito.mp4" playsinline></video>
     <h2>¡Registro hecho correctamente!</h2>
+    <button id="btnDescargarTicket" type="button" style="background:#0f1c2e; margin-bottom:10px;">📄 Abrir PDF</button>
     <button id="btnCerrarModal" type="button">Aceptar</button>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="ticket-pdf.js"></script>
 <script src="script.js"></script>
 </body>
 </html>

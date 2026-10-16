@@ -1,4 +1,4 @@
- const SUPABASE_URL = "https://riirajoptvdcosrvpoug.supabase.co";
+const SUPABASE_URL = "https://riirajoptvdcosrvpoug.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJpaXJham9wdHZkY29zcnZwb3VnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk1NjY0NTcsImV4cCI6MjEwNTE0MjQ1N30.xq2i26iv3RW9w89XmIUodMxjq3eJPg7z2USvByxUjP8";
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -134,6 +134,10 @@ function renderLista() {
     listaOrdenesEl.querySelectorAll(".order-card").forEach((card) => {
       card.addEventListener("click", () => {
         const id = Number(card.getAttribute("data-id"));
+        if (ordenSeleccionada && ordenSeleccionada.id === id) {
+          cerrarDetalle();
+          return;
+        }
         const orden = ordenes.find((o) => o.id === id);
         seleccionarOrden(orden);
       });
@@ -146,6 +150,15 @@ function renderLista() {
 buscadorEl.addEventListener("input", renderLista);
 filtroEstadoEl.addEventListener("change", renderLista);
 filtroEquipoEl.addEventListener("change", renderLista);
+
+/* ---------------------------------------------------------
+   Cierra el detalle (clic de nuevo sobre la orden ya abierta)
+--------------------------------------------------------- */
+function cerrarDetalle() {
+  ordenSeleccionada = null;
+  detalleEl.innerHTML = `<div class="detail__placeholder">Selecciona una orden de la lista para ver y editar su flujo.</div>`;
+  renderLista();
+}
 
 /* ---------------------------------------------------------
    Selección y detalle de una orden

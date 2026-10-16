@@ -1,4 +1,3 @@
-// === PEGA ESTO HASTA ARRIBA DE TU SCRIPT.JS ===
 const comprimirImagen = (archivo, maxResolucion = 1024, calidad = 0.7) => {
   return new Promise((resolve, reject) => {
     if (!archivo || !archivo.type.startsWith('image/')) {
@@ -101,6 +100,7 @@ if (steps[0]) steps[0].classList.add("is-active");
 const form = document.getElementById("formOrden");
 const btnSubmit = document.getElementById("btnSubmit");
 const formStatus = document.getElementById("formStatus");
+let ultimaOrdenRegistrada = null;
 
 function setStatus(message, type) {
   formStatus.textContent = message;
@@ -114,7 +114,7 @@ async function subirFotos(files) {
   for (const fileOriginal of files) {
     let file = fileOriginal; // Variable que usaremos para subir
 
-    // --- ¡AQUÍ ESTÁ LA MAGIA DEL COMPRESOR! ---
+   
     try {
       // Intentamos comprimir la foto antes de subirla
       file = await comprimirImagen(fileOriginal);
@@ -189,6 +189,10 @@ form.addEventListener("submit", async (event) => {
   }
 
   setStatus("Orden " + numeroTicket + " registrada correctamente.", "success");
+
+  // Guardamos los datos de esta orden para poder abrir su comprobante PDF
+  ultimaOrdenRegistrada = { ...payload, created_at: new Date().toISOString() };
+
   form.reset();
 
   // 1. MOSTRAR LA VENTANA Y EL VIDEO
@@ -201,7 +205,17 @@ form.addEventListener("submit", async (event) => {
   }
 }); // <-- AQUÍ TERMINA LA FUNCIÓN DE GUARDAR
 
-// 2. CERRAR LA VENTANA CON EL BOTÓN ACEPTAR
+// 2. ABRIR EL COMPROBANTE EN PDF (TAMAÑO TICKET), listo para imprimir
+const btnDescargarTicket = document.getElementById("btnDescargarTicket");
+if (btnDescargarTicket) {
+  btnDescargarTicket.addEventListener("click", () => {
+    if (ultimaOrdenRegistrada) {
+      generarTicketPDF(ultimaOrdenRegistrada);
+    }
+  });
+}
+
+// 3. CERRAR LA VENTANA CON EL BOTÓN ACEPTAR
 const btnCerrar = document.getElementById("btnCerrarModal");
 if (btnCerrar) {
   btnCerrar.addEventListener("click", () => {

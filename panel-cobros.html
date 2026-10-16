@@ -1,4 +1,4 @@
-<<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -78,7 +78,7 @@
 
   .empty-orders{color:#7d90a4;font-size:.85rem;padding:20px 4px;}
 
-  .detail{padding:32px 40px;overflow-y:auto;max-height:100vh;color:var(--text);}
+  .detail{padding:32px 40px;overflow-y:auto;max-height:100vh;color:var(--text);background:var(--bg);}
   .detail__placeholder{
     height:100%;display:flex;align-items:center;justify-content:center;
     color:var(--muted);font-size:.95rem;text-align:center;
@@ -142,7 +142,7 @@
   @media (max-width: 860px){
     .shell{grid-template-columns:1fr;}
     .orders{max-height:none;}
-    .detail{max-height:none;padding:24px 18px;}
+    .detail{max-height:none;padding:24px 18px;border-radius:16px 16px 0 0;margin-top:-6px;}
     .field-grid{grid-template-columns:1fr;}
   }
 </style>
@@ -198,4 +198,5 @@
 <script src="panel-cobros.js"></script>
 </body>
 </html>
+
 

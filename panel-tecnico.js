@@ -43,6 +43,31 @@ const listaOrdenesEl = document.getElementById("listaOrdenes");
 const detalleEl = document.getElementById("detalle");
 const buscadorEl = document.getElementById("buscador");
 const filtroEstadoEl = document.getElementById("filtroEstado");
+const filtroEquipoEl = document.getElementById("filtroEquipo");
+
+const shellEl = document.querySelector(".shell");
+const mqMobile = window.matchMedia("(max-width: 860px)");
+
+/* ---------------------------------------------------------
+   Ubicación del panel de detalle
+   En pantallas angostas (apiladas) lo colocamos justo debajo de la
+   tarjeta de la orden seleccionada, para no tener que bajar toda la
+   lista; en escritorio lo regresamos a su columna fija junto a la
+   lista (comportamiento original, con scroll independiente).
+--------------------------------------------------------- */
+function posicionarDetalle() {
+  if (ordenSeleccionada && mqMobile.matches) {
+    const card = listaOrdenesEl.querySelector(`.order-card[data-id="${ordenSeleccionada.id}"]`);
+    if (card) {
+      card.insertAdjacentElement("afterend", detalleEl);
+      return;
+    }
+  }
+  if (detalleEl.parentElement !== shellEl) {
+    shellEl.appendChild(detalleEl);
+  }
+}
+mqMobile.addEventListener("change", posicionarDetalle);
 
 /* ---------------------------------------------------------
    Carga inicial
@@ -64,8 +89,16 @@ async function cargarOrdenes() {
 }
 
 function renderLista() {
+  // Si el detalle quedó anidado dentro de la lista (vista acordeón en
+  // móvil), lo sacamos antes de reconstruir las tarjetas para no
+  // perderlo al reemplazar el innerHTML.
+  if (detalleEl.parentElement === listaOrdenesEl) {
+    shellEl.appendChild(detalleEl);
+  }
+
   const texto = buscadorEl.value.trim().toLowerCase();
   const estadoFiltro = filtroEstadoEl.value;
+  const equipoFiltro = filtroEquipoEl.value;
 
   const filtradas = ordenes.filter((o) => {
     const coincideTexto =
@@ -74,42 +107,45 @@ function renderLista() {
       (o.numero_ticket || "").toLowerCase().includes(texto) ||
       (o.marca_modelo || "").toLowerCase().includes(texto);
     const coincideEstado = !estadoFiltro || (o.estado_reparacion || "Pendiente de revisión") === estadoFiltro;
-    return coincideTexto && coincideEstado;
+    const coincideEquipo = !equipoFiltro || (o.tipo_equipo || "") === equipoFiltro;
+    return coincideTexto && coincideEstado && coincideEquipo;
   });
 
   if (filtradas.length === 0) {
     listaOrdenesEl.innerHTML = `<p class="empty-orders">No hay órdenes que coincidan.</p>`;
-    return;
+  } else {
+    listaOrdenesEl.innerHTML = filtradas
+      .map((o) => {
+        const estado = o.estado_reparacion || "Pendiente de revisión";
+        const badgeClass = ESTADO_CLASS[estado] || "badge--pendiente";
+        const activa = ordenSeleccionada && ordenSeleccionada.id === o.id ? "is-active" : "";
+        return `
+          <div class="order-card ${activa}" data-id="${o.id}">
+            <div class="order-card__top">
+              <span class="order-card__folio">${o.numero_ticket || ""}</span>
+              <span class="badge ${badgeClass}">${estado}</span>
+            </div>
+            <div class="order-card__cliente">${o.nombre_cliente || "(sin nombre)"}</div>
+            <div class="order-card__equipo">${o.tipo_equipo || ""} · ${o.marca_modelo || ""}</div>
+          </div>`;
+      })
+      .join("");
+
+    listaOrdenesEl.querySelectorAll(".order-card").forEach((card) => {
+      card.addEventListener("click", () => {
+        const id = Number(card.getAttribute("data-id"));
+        const orden = ordenes.find((o) => o.id === id);
+        seleccionarOrden(orden);
+      });
+    });
   }
 
-  listaOrdenesEl.innerHTML = filtradas
-    .map((o) => {
-      const estado = o.estado_reparacion || "Pendiente de revisión";
-      const badgeClass = ESTADO_CLASS[estado] || "badge--pendiente";
-      const activa = ordenSeleccionada && ordenSeleccionada.id === o.id ? "is-active" : "";
-      return `
-        <div class="order-card ${activa}" data-id="${o.id}">
-          <div class="order-card__top">
-            <span class="order-card__folio">${o.numero_ticket || ""}</span>
-            <span class="badge ${badgeClass}">${estado}</span>
-          </div>
-          <div class="order-card__cliente">${o.nombre_cliente || "(sin nombre)"}</div>
-          <div class="order-card__equipo">${o.tipo_equipo || ""} · ${o.marca_modelo || ""}</div>
-        </div>`;
-    })
-    .join("");
-
-  listaOrdenesEl.querySelectorAll(".order-card").forEach((card) => {
-    card.addEventListener("click", () => {
-      const id = Number(card.getAttribute("data-id"));
-      const orden = ordenes.find((o) => o.id === id);
-      seleccionarOrden(orden);
-    });
-  });
+  posicionarDetalle();
 }
 
 buscadorEl.addEventListener("input", renderLista);
 filtroEstadoEl.addEventListener("change", renderLista);
+filtroEquipoEl.addEventListener("change", renderLista);
 
 /* ---------------------------------------------------------
    Selección y detalle de una orden
@@ -119,6 +155,9 @@ function seleccionarOrden(orden) {
   renderLista();
   renderDetalle();
   cargarRepuestos(orden.id);
+  if (mqMobile.matches) {
+    detalleEl.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 }
 
 function renderDetalle() {

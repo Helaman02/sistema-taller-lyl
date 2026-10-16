@@ -150,6 +150,10 @@ function renderLista() {
     listaOrdenesEl.querySelectorAll(".order-card").forEach((card) => {
       card.addEventListener("click", () => {
         const id = Number(card.getAttribute("data-id"));
+        if (ordenSeleccionada && ordenSeleccionada.id === id) {
+          cerrarDetalle();
+          return;
+        }
         const orden = ordenes.find((o) => o.id === id);
         seleccionarOrden(orden);
       });
@@ -162,6 +166,15 @@ function renderLista() {
 buscadorEl.addEventListener("input", renderLista);
 filtroEstadoPagoEl.addEventListener("change", renderLista);
 filtroEquipoEl.addEventListener("change", renderLista);
+
+/* ---------------------------------------------------------
+   Cierra el detalle (clic de nuevo sobre la orden ya abierta)
+--------------------------------------------------------- */
+function cerrarDetalle() {
+  ordenSeleccionada = null;
+  detalleEl.innerHTML = `<div class="detail__placeholder">Selecciona una orden de la lista para ver y cobrar.</div>`;
+  renderLista();
+}
 
 /* ---------------------------------------------------------
    Selección y detalle de una orden

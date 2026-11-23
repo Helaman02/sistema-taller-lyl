@@ -38,4 +38,4 @@
    archivo en GitHub. Nada más.
    ========================================================= */
 
-const TEMA_ACTIVO = "ano-nuevo";
+const TEMA_ACTIVO = "dia-del-carino";

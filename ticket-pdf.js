@@ -1,7 +1,9 @@
 /* =========================================================
    GENERADOR DE COMPROBANTE EN PDF TAMAÑO TICKET (80mm)
    Usa jsPDF (cargar el script de jsPDF antes que este archivo).
-   Incluye únicamente datos del cliente y del equipo, sin costos.
+   Ticket interno (NO se entrega al cliente): se pega al equipo para
+   identificarlo. Si el cliente dejó accesorios, el mismo PDF trae una
+   segunda página con el ticket de los accesorios.
    ========================================================= */
 
 /* Logo de Accesorios L&L, ya comprimido y embebido como base64
@@ -35,11 +37,20 @@ function generarTicketPDF(orden) {
     return String(texto).toUpperCase().split("").join(" ");
   }
 
-  /* Dibuja todo el contenido sobre "doc" y regresa el alto (mm) usado.
-     Se llama dos veces: una para medir y otra para generar el PDF final
-     con el alto exacto (evita espacio en blanco sobrante). */
-  function dibujarContenido(doc) {
-    let y = 8;
+  /* Accesorios que dejó el cliente (sin el texto "Ninguno") */
+  const listaAccesorios = String(orden.accesorios || "")
+    .split(",")
+    .map((a) => a.trim())
+    .filter((a) => a && !/^ninguno/i.test(a));
+  const equipoTexto = [orden.tipo_equipo, orden.marca_modelo]
+    .filter(Boolean)
+    .join(" · ");
+
+  /* Dibuja un ticket sobre la página actual de "doc" y regresa el alto
+     (mm) usado. tipo: "equipo" | "accesorios". Se llama dos veces por
+     ticket: una para medir y otra para dibujar con el alto exacto. */
+  function dibujarTicket(doc, tipo) {
+    let y = 6;
 
     function centrado(texto, tam, color, negrita) {
       doc.setFont("helvetica", negrita ? "bold" : "normal");
@@ -65,35 +76,24 @@ function generarTicketPDF(orden) {
       y += 3.6;
     }
 
-    function tituloSeccion(texto) {
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(7.6);
-      doc.setTextColor(NAVY[0], NAVY[1], NAVY[2]);
-      // Pequeño marcador de color antes del título
-      doc.setFillColor(NAVY[0], NAVY[1], NAVY[2]);
-      doc.rect(MARGEN_MM, y - 2.4, 2, 2, "F");
-      doc.text(espaciado(texto), MARGEN_MM + 3.6, y, { align: "left" });
-      y += 4.6;
-    }
-
-    function campo(etiqueta, valor) {
+    function campo(etiqueta, valor, grande) {
       if (!valor) return;
       doc.setFont("helvetica", "bold");
       doc.setFontSize(7.3);
       doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
       doc.text(String(etiqueta).toUpperCase(), MARGEN_MM, y);
       y += 3.7;
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(9.3);
+      doc.setFont("helvetica", grande ? "bold" : "normal");
+      doc.setFontSize(grande ? 11 : 9.3);
       doc.setTextColor(TEXTO[0], TEXTO[1], TEXTO[2]);
       const lineas = doc.splitTextToSize(String(valor), ANCHO_UTIL);
       doc.text(lineas, MARGEN_MM, y);
-      y += lineas.length * LINEA_ALTO + 2;
+      y += lineas.length * (grande ? 5.2 : LINEA_ALTO) + 2;
     }
 
     /* ---------- Encabezado con logo ---------- */
-    const logoAncho = 20;
-    const logoAlto = 20 * (251 / 260); // proporción real del logo comprimido
+    const logoAncho = 14;
+    const logoAlto = logoAncho * (251 / 260); // proporción real del logo
     try {
       doc.addImage(
         LOGO_LL_BASE64,
@@ -104,84 +104,102 @@ function generarTicketPDF(orden) {
         logoAlto
       );
     } catch (e) {
-      console.warn("No se pudo dibujar el logo en el comprobante:", e);
+      console.warn("No se pudo dibujar el logo en el ticket:", e);
     }
-    y += logoAlto + 3;
+    y += logoAlto + 4;
 
-    centrado("Accesorios L&L", 14.5, NAVY, true);
-    doc.setFont("helvetica", "italic");
-    doc.setFontSize(8.2);
-    doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
-    doc.text("Recepción y servicio técnico", ANCHO_MM / 2, y, { align: "center" });
-    y += LINEA_ALTO + 1.5;
-
-    lineaSolida(NAVY, 0.6);
+    centrado("Accesorios L&L", 12.5, NAVY, true);
     y += 1;
 
+    /* ---------- Banda que distingue un ticket del otro ---------- */
+    doc.setFillColor(NAVY[0], NAVY[1], NAVY[2]);
+    doc.rect(MARGEN_MM, y - 3.6, ANCHO_UTIL, 7, "F");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10.5);
+    doc.setTextColor(255, 255, 255);
+    doc.text(
+      tipo === "accesorios" ? "ACCESORIOS" : "EQUIPO",
+      ANCHO_MM / 2,
+      y + 1.1,
+      { align: "center" }
+    );
+    y += 8;
+
     /* ---------- Folio y fecha ---------- */
-    centrado("Orden " + (orden.numero_ticket || ""), 11.5, NAVY, true);
+    centrado(orden.numero_ticket || "", 14, NAVY, true);
     const fecha = orden.created_at ? new Date(orden.created_at) : new Date();
     const fechaTexto = fecha.toLocaleString("es-GT", {
       dateStyle: "medium",
       timeStyle: "short",
     });
     centrado(fechaTexto, 8, MUTED, false);
-    y += 2;
-
+    y += 1;
     lineaPunteada();
-    y += 2;
 
-    /* ---------- Datos del cliente ---------- */
-    tituloSeccion("Datos del cliente");
+    /* ---------- Cliente (en ambos tickets) ---------- */
     campo("Cliente", orden.nombre_cliente);
     campo("Teléfono", orden.telefono);
-    campo("Correo", orden.correo);
-    campo("Dirección", orden.direccion);
-
     lineaPunteada();
-    y += 2;
 
-    /* ---------- Datos del equipo ---------- */
-    tituloSeccion("Datos del equipo");
-    campo("Tipo de equipo", orden.tipo_equipo);
-    campo("Marca y modelo", orden.marca_modelo);
-    campo("Número de serie", orden.numero_serie);
-    campo("Especificaciones", orden.especificaciones);
-    campo("Accesorios recibidos", orden.accesorios);
-    campo("Motivo de ingreso", orden.descripcion_falla);
-    campo("Estado físico al recibir", orden.estado_fisico);
+    if (tipo === "accesorios") {
+      /* ---------- Ticket de accesorios ---------- */
+      campo("Pertenecen al equipo", equipoTexto);
+      campo("Número de serie", orden.numero_serie);
+      lineaPunteada();
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(7.3);
+      doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+      doc.text("ACCESORIOS RECIBIDOS", MARGEN_MM, y);
+      y += 4.4;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.setTextColor(TEXTO[0], TEXTO[1], TEXTO[2]);
+      listaAccesorios.forEach((a) => {
+        const lineas = doc.splitTextToSize("• " + a, ANCHO_UTIL);
+        doc.text(lineas, MARGEN_MM, y);
+        y += lineas.length * 5 + 0.8;
+      });
+      y += 3;
+    } else {
+      /* ---------- Ticket del equipo ---------- */
+      campo("Equipo", equipoTexto);
+      campo("Número de serie", orden.numero_serie);
+      campo("Especificaciones", orden.especificaciones);
+      campo("Contraseña / PIN", orden.contrasena || "Sin contraseña", true);
+      lineaPunteada();
+      campo("Motivo de ingreso", orden.descripcion_falla);
+      campo("Estado físico al recibir", orden.estado_fisico);
+      if (listaAccesorios.length) {
+        campo("Accesorios", "Dejó accesorios (ver ticket aparte)");
+      }
+      y += 2;
+    }
 
     lineaSolida(LINEA_SUAVE, 0.3);
-    y += 1;
-
-    /* ---------- Pie ---------- */
-    doc.setFont("helvetica", "italic");
-    doc.setFontSize(7.6);
-    doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
-    const nota =
-      "Conserve este comprobante. Es necesario para retirar el equipo.";
-    const lineasNota = doc.splitTextToSize(nota, ANCHO_UTIL - 4);
-    doc.text(lineasNota, ANCHO_MM / 2, y, { align: "center" });
-    y += lineasNota.length * 3.9 + 3;
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(7.6);
-    doc.setTextColor(NAVY[0], NAVY[1], NAVY[2]);
-    doc.text("¡Gracias por su confianza!", ANCHO_MM / 2, y, { align: "center" });
-    y += 6;
-
     return y;
   }
 
-  /* 1) Medimos el contenido en un documento temporal muy alto */
-  const docMedida = new jsPDF({ unit: "mm", format: [ANCHO_MM, 1000] });
-  const altoNecesario = dibujarContenido(docMedida);
+  /* Tickets a generar: siempre el del equipo; el de accesorios solo si
+     el cliente dejó alguno. Cada uno es una página del mismo PDF. */
+  const tickets = ["equipo"];
+  if (listaAccesorios.length) tickets.push("accesorios");
 
-  /* 2) Generamos el documento final con el alto exacto (sin sobrar papel) */
-  const docFinal = new jsPDF({ unit: "mm", format: [ANCHO_MM, altoNecesario] });
-  dibujarContenido(docFinal);
+  /* 1) Medimos cada ticket en un documento temporal muy alto */
+  const alturas = tickets.map((t) => {
+    const docMedida = new jsPDF({ unit: "mm", format: [ANCHO_MM, 1000] });
+    return Math.max(dibujarTicket(docMedida, t) + 2, 90);
+  });
+
+  /* 2) Generamos el PDF final: una página por ticket, con su alto exacto */
+  const docFinal = new jsPDF({ unit: "mm", format: [ANCHO_MM, alturas[0]] });
+  dibujarTicket(docFinal, tickets[0]);
+  for (let i = 1; i < tickets.length; i++) {
+    docFinal.addPage([ANCHO_MM, alturas[i]]);
+    dibujarTicket(docFinal, tickets[i]);
+  }
   docFinal.setProperties({
-    title: "Comprobante " + (orden.numero_ticket || ""),
+    title: "Ticket " + (orden.numero_ticket || ""),
   });
 
   /* Abrimos el PDF en una pestaña nueva (visor de Chrome), igual que la

@@ -95,6 +95,8 @@
   .badge--espera{background:var(--red-bg);color:var(--red);}
   .badge--listo,.badge--entregado{background:#e6f4ec;color:var(--green-dark);}
   .badge--cancelado{background:#eee;color:#666;}
+  .badge--centro{background:#efe7fb;color:#5b3a99;}
+  .badge--tecnico{background:#dff3f5;color:#0b6b78;}
 
   .empty-orders{color:#7d90a4;font-size:.85rem;padding:20px 4px;}
 
@@ -228,8 +230,13 @@
     .add-repuesto{grid-template-columns:1fr 1fr;}
   }
 </style>
+<link rel="stylesheet" href="menu.css">
+<link rel="stylesheet" href="tema-estacional.css">
 </head>
 <body>
+<script src="tema-config.js"></script>
+<script src="tema.js"></script>
+<script src="menu.js"></script>
 
 <div class="shell">
 
@@ -240,19 +247,6 @@
       </h1>
     </div>
 
-    <a href="index.html" style="display: block; background: #1d3450; color: #ffffff; text-align: center; text-decoration: none; padding: 10px; border-radius: 8px; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 0.9rem; border: 1px solid #3a5977; margin-top: 5px;">
-      📝 Nueva Orden (Recepción)
-    </a>
-    <a href="panel-cobros.html" style="display: block; background: #1f7a4f; color: #ffffff; text-align: center; text-decoration: none; padding: 10px; border-radius: 8px; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 0.9rem; margin-top: 8px;">
-      💵 Panel de Cobros
-    </a>
-    <a href="panel-kpis.html" style="display: block; background: #1d3450; color: #ffffff; text-align: center; text-decoration: none; padding: 10px; border-radius: 8px; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 0.9rem; border: 1px solid #3a5977; margin-top: 8px;">
-      📊 Indicadores (KPIs)
-    </a>
-    <button type="button" id="btnCerrarSesion" style="display: block; width: 100%; background: none; color: #9fadb6; text-align: center; padding: 8px; border-radius: 8px; font-family: 'Inter', sans-serif; font-weight: 500; font-size: 0.82rem; border: none; cursor: pointer; margin-top: 8px;">
-      Cerrar sesión
-    </button>
-
     <div class="orders__controls">
       <input type="text" id="buscador" placeholder="Buscar cliente, folio o equipo…">
       <select id="filtroEstado">
@@ -261,8 +255,9 @@
         <option value="En diagnóstico">En diagnóstico</option>
         <option value="Esperando repuestos">Esperando repuestos</option>
         <option value="En reparación">En reparación</option>
+        <option value="Centro de servicio">Centro de servicio</option>
+        <option value="Técnico de impresoras">Técnico de impresoras</option>
         <option value="Listo para entrega">Listo para entrega</option>
-        <option value="Entregado">Entregado</option>
         <option value="Cancelado">Cancelado</option>
       </select>
       <select id="filtroEquipo">

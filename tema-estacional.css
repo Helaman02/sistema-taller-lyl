@@ -1,0 +1,137 @@
+/* =========================================================
+   TEMAS DE FIESTAS
+   -----------------------------------------------------------
+   Este archivo NO cambia nada por sí solo. Solo actúa cuando
+   <body> tiene una clase "tema-…", que pone tema.js según lo
+   que diga tema-config.js.
+
+   Para cambiar o quitar el tema: edita SOLO tema-config.js.
+   No hace falta tocar este archivo.
+
+   Temas incluidos:
+     ano-nuevo · dia-del-carino · semana-santa · dia-de-la-madre
+     dia-del-padre · fiestas-patrias · halloween · dia-de-muertos
+     navidad
+   ========================================================= */
+
+/* ---------- Reglas comunes a todos los temas ---------- */
+
+/* La pantalla de recepción (style.css) usa otros nombres de variable;
+   aquí los conectamos a los mismos colores del tema. */
+body[class*="tema-"]{
+  --color-ink:var(--navy);
+  --color-accent:var(--green);
+  --color-accent-dark:var(--green-dark);
+  --color-bg:var(--bg);
+}
+
+/* Resplandor muy sutil en las esquinas, detrás de todo */
+body[class*="tema-"]::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:0;
+  background:
+    radial-gradient(circle at 4% 2%, var(--tema-glow-1, transparent), transparent 10%),
+    radial-gradient(circle at 96% 6%, var(--tema-glow-2, transparent), transparent 11%);
+}
+
+/* Un emoji antes de los títulos principales */
+body[class*="tema-"] .orders__title::before,
+body[class*="tema-"] .topbar h1::before,
+body[class*="tema-"] .brand__name strong::before,
+body[class*="tema-"] .card h1::before{
+  content:var(--tema-emoji, "");
+}
+
+body[class*="tema-"] .order-card.is-active{
+  border-color:var(--tema-accent, var(--green));
+}
+body[class*="tema-"] .brand img{
+  box-shadow:0 0 0 2px rgba(255,255,255,.55);
+}
+body[class*="tema-"] button:hover{
+  filter:brightness(1.03);
+}
+
+/* ---------- AÑO NUEVO (31 dic – 1 ene) · negro y dorado ---------- */
+body.tema-ano-nuevo{
+  --navy:#1a1a1a; --navy-2:#2b2b2b;
+  --green:#c9a227; --green-dark:#a8871c;
+  --bg:#fdfaf2;
+  --tema-glow-1:rgba(212,175,55,.16); --tema-glow-2:rgba(255,255,255,.12);
+  --tema-emoji:"🎉 "; --tema-accent:#d4af37;
+}
+
+/* ---------- DÍA DEL CARIÑO (10–14 feb) · rosa y rojo ---------- */
+body.tema-dia-del-carino{
+  --navy:#6b1530; --navy-2:#8a1c3e;
+  --green:#e0456b; --green-dark:#b8365a;
+  --bg:#fff2f5;
+  --tema-glow-1:rgba(224,69,107,.14); --tema-glow-2:rgba(255,182,193,.14);
+  --tema-emoji:"💘 "; --tema-accent:#e0456b;
+}
+
+/* ---------- SEMANA SANTA (Domingo de Ramos – Domingo de Pascua) · morado ---------- */
+body.tema-semana-santa{
+  --navy:#2e1a47; --navy-2:#3d2560;
+  --green:#6a4c93; --green-dark:#523a73;
+  --bg:#f6f2fa;
+  --tema-glow-1:rgba(106,76,147,.13); --tema-glow-2:rgba(160,130,200,.11);
+  --tema-emoji:"🕯️ "; --tema-accent:#8a6cb8;
+}
+
+/* ---------- DÍA DE LA MADRE (8–10 may) · rosa floral ---------- */
+body.tema-dia-de-la-madre{
+  --navy:#7a2048; --navy-2:#962a5b;
+  --green:#d6336c; --green-dark:#ad2957;
+  --bg:#fff0f6;
+  --tema-glow-1:rgba(214,51,108,.14); --tema-glow-2:rgba(255,192,203,.14);
+  --tema-emoji:"🌷 "; --tema-accent:#d6336c;
+}
+
+/* ---------- DÍA DEL PADRE (viernes a domingo del 3.er domingo de junio) · azul ---------- */
+body.tema-dia-del-padre{
+  --navy:#102542; --navy-2:#173863;
+  --green:#2563eb; --green-dark:#1d4ed8;
+  --bg:#eef4ff;
+  --tema-glow-1:rgba(37,99,235,.14); --tema-glow-2:rgba(100,150,255,.12);
+  --tema-emoji:"🎩 "; --tema-accent:#3b82f6;
+}
+
+/* ---------- FIESTAS PATRIAS (1–15 sep) · azul y blanco ---------- */
+body.tema-fiestas-patrias{
+  --navy:#0b3d91; --navy-2:#124bb5;
+  --green:#1d6fb8; --green-dark:#155a97;
+  --bg:#f3f7fd;
+  --tema-glow-1:rgba(11,61,145,.15); --tema-glow-2:rgba(255,255,255,.2);
+  --tema-emoji:"🇬🇹 "; --tema-accent:#4a90e2;
+}
+
+/* ---------- HALLOWEEN (1–31 oct) · morado y naranja ---------- */
+body.tema-halloween{
+  --navy:#2b1245; --navy-2:#3c1361;
+  --green:#ff7518; --green-dark:#d9600f;
+  --bg:#faf3ec;
+  --tema-glow-1:rgba(255,117,24,.13); --tema-glow-2:rgba(142,68,173,.13);
+  --tema-emoji:"🎃 "; --tema-accent:#ff9a4d;
+}
+
+/* ---------- DÍA DE MUERTOS (1–2 nov) · guinda y cempasúchil ---------- */
+body.tema-dia-de-muertos{
+  --navy:#3a1230; --navy-2:#55173f;
+  --green:#e4572e; --green-dark:#b8431f;
+  --bg:#fbf2e9;
+  --tema-glow-1:rgba(255,183,3,.15); --tema-glow-2:rgba(228,87,46,.13);
+  --tema-emoji:"💀 "; --tema-accent:#ffb703;
+}
+
+/* ---------- NAVIDAD (1–25 dic) · verde y rojo ---------- */
+body.tema-navidad{
+  --navy:#0f3d24; --navy-2:#155231;
+  --green:#c0392b; --green-dark:#962d22;
+  --bg:#f3faf4;
+  --tema-glow-1:rgba(192,57,43,.14); --tema-glow-2:rgba(255,255,255,.2);
+  --tema-emoji:"🎄 "; --tema-accent:#e0584a;
+}

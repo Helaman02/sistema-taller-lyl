@@ -1,0 +1,141 @@
+/* =========================================================
+   MENÚ DE 3 BARRAS (esquina superior izquierda)
+   Se usa en todas las pantallas, excepto el login.
+   Colores: usa --navy / --green si la página los define
+   (así también cambia con los temas de fiestas).
+   ========================================================= */
+.menu-btn{
+  position:fixed;
+  top:12px;
+  left:12px;
+  z-index:10000;
+  width:42px;
+  height:42px;
+  padding:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  background:var(--navy,#0f1c2e);
+  border:1px solid rgba(255,255,255,.28);
+  border-radius:10px;
+  box-shadow:0 4px 14px rgba(0,0,0,.28);
+  cursor:pointer;
+}
+.menu-btn span{
+  display:block;
+  width:20px;
+  height:2.5px;
+  border-radius:2px;
+  background:#fff;
+  transition:transform .2s ease, opacity .2s ease;
+}
+.menu-btn:hover{filter:brightness(1.15);}
+.menu-btn:focus-visible{outline:3px solid #8ec5ff;outline-offset:2px;}
+
+/* Reserva espacio arriba para que el botón no tape títulos */
+body.tiene-menu .orders{padding-top:68px;}
+body.tiene-menu .page{padding-top:80px;}
+body.tiene-menu .ticket{margin-top:36px;}
+
+/* ---- Fondo oscuro detrás del menú ---- */
+.menu-overlay{
+  position:fixed;
+  inset:0;
+  z-index:10001;
+  background:rgba(8,14,22,.55);
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .22s ease;
+}
+.menu-overlay.is-open{opacity:1;pointer-events:auto;}
+
+/* ---- Panel deslizable ---- */
+.menu-drawer{
+  position:fixed;
+  top:0;
+  left:0;
+  bottom:0;
+  z-index:10002;
+  width:min(300px, 86vw);
+  background:var(--navy,#0f1c2e);
+  color:#eaf0f6;
+  padding:18px 16px 22px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  transform:translateX(-102%);
+  visibility:hidden;
+  box-shadow:none;
+  transition:transform .25s ease, visibility 0s linear .25s, box-shadow .25s ease;
+  overflow-y:auto;
+}
+.menu-drawer.is-open{
+  transform:translateX(0);
+  visibility:visible;
+  box-shadow:6px 0 28px rgba(0,0,0,.35);
+  transition:transform .25s ease, visibility 0s, box-shadow .25s ease;
+}
+
+.menu-drawer__head{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin:0 0 12px;
+  padding:0 0 14px 0;
+  border-bottom:1px solid rgba(255,255,255,.14);
+}
+.menu-drawer__head img{
+  width:40px;height:40px;object-fit:contain;
+  background:#fff;border-radius:8px;padding:2px;
+}
+.menu-drawer__head strong{
+  display:block;font-family:'Space Grotesk',sans-serif;font-size:1rem;color:#fff;
+}
+.menu-drawer__head small{display:block;color:#9fb4c8;font-size:.76rem;}
+.menu-drawer__close{
+  margin-left:auto;
+  width:34px;height:34px;padding:0;
+  background:rgba(255,255,255,.1);
+  color:#fff;border:none;border-radius:8px;
+  font-size:1.2rem;line-height:1;cursor:pointer;
+}
+
+.menu-item{
+  display:block;
+  padding:12px 14px;
+  border-radius:10px;
+  color:#fff;
+  text-decoration:none;
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:600;
+  font-size:.95rem;
+  background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.1);
+}
+.menu-item:hover{background:rgba(255,255,255,.16);}
+.menu-item.is-current{
+  background:var(--green,#1f7a4f);
+  border-color:transparent;
+  cursor:default;
+}
+
+.menu-drawer__logout{
+  margin-top:auto;
+  width:100%;
+  padding:12px;
+  background:none;
+  color:#b9c7d3;
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:10px;
+  font-family:'Inter',sans-serif;
+  font-weight:500;
+  font-size:.9rem;
+  cursor:pointer;
+}
+.menu-drawer__logout:hover{background:rgba(255,255,255,.1);color:#fff;}
+
+@media (prefers-reduced-motion: reduce){
+  .menu-drawer,.menu-overlay,.menu-btn span{transition:none;}
+}

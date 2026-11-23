@@ -146,8 +146,13 @@
     .field-grid{grid-template-columns:1fr;}
   }
 </style>
+<link rel="stylesheet" href="menu.css">
+<link rel="stylesheet" href="tema-estacional.css">
 </head>
 <body>
+<script src="tema-config.js"></script>
+<script src="tema.js"></script>
+<script src="menu.js"></script>
 
 <div class="shell">
 
@@ -157,13 +162,6 @@
         <span>Control financiero por orden</span>
       </h1>
     </div>
-
-    <a href="panel-tecnico.html" class="nav-link">⚙️ Panel de taller</a>
-    <a href="index.html" class="nav-link">📝 Nueva orden (recepción)</a>
-    <a href="panel-kpis.html" class="nav-link">📊 Indicadores (KPIs)</a>
-    <button type="button" id="btnCerrarSesion" style="display: block; width: 100%; background: none; color: #9fadb6; text-align: center; padding: 8px; border-radius: 8px; font-family: 'Inter', sans-serif; font-weight: 500; font-size: 0.82rem; border: none; cursor: pointer; margin-top: 4px;">
-      Cerrar sesión
-    </button>
 
     <div class="orders__controls">
       <input type="text" id="buscador" placeholder="Buscar cliente, folio o equipo…">
@@ -198,5 +196,3 @@
 <script src="panel-cobros.js"></script>
 </body>
 </html>
-
-

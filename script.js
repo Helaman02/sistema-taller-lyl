@@ -1,3 +1,4 @@
+// === PEGA ESTO HASTA ARRIBA DE TU SCRIPT.JS ===
 const comprimirImagen = (archivo, maxResolucion = 1024, calidad = 0.7) => {
   return new Promise((resolve, reject) => {
     if (!archivo || !archivo.type.startsWith('image/')) {
@@ -114,7 +115,7 @@ async function subirFotos(files) {
   for (const fileOriginal of files) {
     let file = fileOriginal; // Variable que usaremos para subir
 
-   
+    // --- ¡AQUÍ ESTÁ LA MAGIA DEL COMPRESOR! ---
     try {
       // Intentamos comprimir la foto antes de subirla
       file = await comprimirImagen(fileOriginal);
@@ -135,6 +136,25 @@ async function subirFotos(files) {
   return urls;
 }
 
+/* ---------------------------------------------------------
+   Accesorios: la casilla "No dejó nada" apaga las demás opciones
+--------------------------------------------------------- */
+const sinAccesoriosEl = document.getElementById("sinAccesorios");
+const checksAccesorios = Array.from(form.querySelectorAll('input[name="accesorios"]'));
+
+function sincronizarSinAccesorios() {
+  const ninguno = sinAccesoriosEl.checked;
+  checksAccesorios.forEach((c) => {
+    if (ninguno) c.checked = false;
+    c.disabled = ninguno;
+    c.closest("label").classList.toggle("is-disabled", ninguno);
+  });
+  if (ninguno) form.accesoriosOtro.value = "";
+  form.accesoriosOtro.disabled = ninguno;
+}
+sinAccesoriosEl.addEventListener("change", sincronizarSinAccesorios);
+form.addEventListener("reset", () => setTimeout(sincronizarSinAccesorios, 0));
+
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
 
@@ -143,15 +163,23 @@ form.addEventListener("submit", async (event) => {
     return;
   }
 
-  btnSubmit.disabled = true;
-  setStatus("Guardando orden…", null);
-
   const accesorios = Array.from(
     form.querySelectorAll('input[name="accesorios"]:checked')
   ).map((el) => el.value);
 
   const accesoriosOtro = form.accesoriosOtro.value.trim();
   if (accesoriosOtro) accesorios.push(accesoriosOtro);
+
+  // Obligamos a indicar qué dejó el cliente (o marcar "No dejó nada")
+  if (!sinAccesoriosEl.checked && accesorios.length === 0) {
+    setStatus("Indica qué accesorios dejó el cliente, o marca “No dejó nada”.", "error");
+    document.getElementById("grupoAccesorios").scrollIntoView({ behavior: "smooth", block: "center" });
+    return;
+  }
+  if (sinAccesoriosEl.checked) accesorios.push("Ninguno (no dejó nada)");
+
+  btnSubmit.disabled = true;
+  setStatus("Guardando orden…", null);
 
   const fotos = form.fotos.files;
   let fotoUrls = [];

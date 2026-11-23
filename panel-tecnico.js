@@ -1,4 +1,4 @@
-const SUPABASE_URL = "https://riirajoptvdcosrvpoug.supabase.co";
+ const SUPABASE_URL = "https://riirajoptvdcosrvpoug.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJpaXJham9wdHZkY29zcnZwb3VnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk1NjY0NTcsImV4cCI6MjEwNTE0MjQ1N30.xq2i26iv3RW9w89XmIUodMxjq3eJPg7z2USvByxUjP8";
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -16,25 +16,81 @@ document.getElementById("btnCerrarSesion")?.addEventListener("click", () => {
   supabaseClient.auth.signOut().then(() => (window.location.href = "login.html"));
 });
 
-const ESTADOS = [
+/* ---------------------------------------------------------
+   Modo de la pantalla (los tres paneles usan este mismo archivo)
+   - Panel de taller: equipos en proceso (los entregados NO salen aquí).
+   - Panel de impresoras (panel-impresoras.html): solo impresoras en
+     proceso (esa página activa window.PANEL_SOLO_IMPRESORAS).
+   - Panel de entregados (panel-entregados.html): todos los equipos ya
+     entregados (esa página activa window.PANEL_ENTREGADOS).
+   Si quieres que el Panel de taller NO muestre impresoras (porque ya
+   se manejan en su panel), cambia el false por true.
+--------------------------------------------------------- */
+const SOLO_IMPRESORAS = window.PANEL_SOLO_IMPRESORAS === true;
+const SOLO_ENTREGADOS = window.PANEL_ENTREGADOS === true;
+const OCULTAR_IMPRESORAS_EN_TALLER = false;
+const ESTADO_ENTREGADO = "Entregado";
+
+/* ¿Esta orden se muestra en la pantalla actual? */
+function esVisibleEnEstaVista(o) {
+  const entregado = (o.estado_reparacion || "") === ESTADO_ENTREGADO;
+  const esImpresora = (o.tipo_equipo || "") === "Impresora";
+  if (SOLO_ENTREGADOS) return entregado;
+  if (entregado) return false;
+  if (SOLO_IMPRESORAS) return esImpresora;
+  if (OCULTAR_IMPRESORAS_EN_TALLER) return !esImpresora;
+  return true;
+}
+
+/* A dónde se fue una orden que dejó de verse aquí (para avisarlo) */
+function destinoDe(o) {
+  if ((o.estado_reparacion || "") === ESTADO_ENTREGADO) return "Panel de entregados";
+  const esImpresora = (o.tipo_equipo || "") === "Impresora";
+  if (esImpresora && (SOLO_ENTREGADOS || OCULTAR_IMPRESORAS_EN_TALLER)) return "Panel de impresoras";
+  return "Panel de taller";
+}
+
+const ESTADO_TECNICO_IMPRESORAS = "Técnico de impresoras";
+const ESTADOS_BASE = [
   "Pendiente de revisión",
   "En diagnóstico",
   "Esperando repuestos",
   "En reparación",
+  "Centro de servicio",
   "Listo para entrega",
   "Entregado",
   "Cancelado",
 ];
+
+/* Estados disponibles para una orden: los de siempre, y a las
+   impresoras se les suma "Técnico de impresoras". Si la orden ya
+   tiene un estado que no está en la lista, se conserva para no
+   perderlo al guardar. */
+function estadosPara(o) {
+  const lista = [...ESTADOS_BASE];
+  if ((o.tipo_equipo || "") === "Impresora") lista.splice(2, 0, ESTADO_TECNICO_IMPRESORAS);
+  const actual = o.estado_reparacion;
+  if (actual && !lista.includes(actual)) lista.push(actual);
+  return lista;
+}
 
 const ESTADO_CLASS = {
   "Pendiente de revisión": "badge--pendiente",
   "En diagnóstico": "badge--proceso",
   "Esperando repuestos": "badge--espera",
   "En reparación": "badge--proceso",
+  "Centro de servicio": "badge--centro",
+  "Técnico de impresoras": "badge--tecnico",
   "Listo para entrega": "badge--listo",
   "Entregado": "badge--entregado",
   "Cancelado": "badge--cancelado",
 };
+
+const TEXTO_PLACEHOLDER = SOLO_ENTREGADOS
+  ? "Selecciona un equipo entregado de la lista para ver su historial."
+  : SOLO_IMPRESORAS
+  ? "Selecciona una impresora de la lista para ver y editar su flujo."
+  : "Selecciona una orden de la lista para ver y editar su flujo.";
 
 let ordenes = [];
 let ordenSeleccionada = null;
@@ -85,6 +141,11 @@ async function cargarOrdenes() {
   }
 
   ordenes = data || [];
+  if (SOLO_ENTREGADOS) {
+    // Los entregados más recientes primero
+    const fechaDe = (o) => new Date(o.fecha_real_entrega || o.created_at || 0).getTime();
+    ordenes.sort((a, b) => fechaDe(b) - fechaDe(a));
+  }
   renderLista();
 }
 
@@ -97,10 +158,10 @@ function renderLista() {
   }
 
   const texto = buscadorEl.value.trim().toLowerCase();
-  const estadoFiltro = filtroEstadoEl.value;
-  const equipoFiltro = filtroEquipoEl.value;
+  const estadoFiltro = filtroEstadoEl ? filtroEstadoEl.value : "";
+  const equipoFiltro = filtroEquipoEl ? filtroEquipoEl.value : "";
 
-  const filtradas = ordenes.filter((o) => {
+  const filtradas = ordenes.filter(esVisibleEnEstaVista).filter((o) => {
     const coincideTexto =
       !texto ||
       (o.nombre_cliente || "").toLowerCase().includes(texto) ||
@@ -148,15 +209,15 @@ function renderLista() {
 }
 
 buscadorEl.addEventListener("input", renderLista);
-filtroEstadoEl.addEventListener("change", renderLista);
-filtroEquipoEl.addEventListener("change", renderLista);
+if (filtroEstadoEl) filtroEstadoEl.addEventListener("change", renderLista);
+if (filtroEquipoEl) filtroEquipoEl.addEventListener("change", renderLista);
 
 /* ---------------------------------------------------------
    Cierra el detalle (clic de nuevo sobre la orden ya abierta)
 --------------------------------------------------------- */
-function cerrarDetalle() {
+function cerrarDetalle(mensaje) {
   ordenSeleccionada = null;
-  detalleEl.innerHTML = `<div class="detail__placeholder">Selecciona una orden de la lista para ver y editar su flujo.</div>`;
+  detalleEl.innerHTML = `<div class="detail__placeholder">${mensaje || TEXTO_PLACEHOLDER}</div>`;
   renderLista();
 }
 
@@ -175,8 +236,9 @@ function seleccionarOrden(orden) {
 
 function renderDetalle() {
   const o = ordenSeleccionada;
-  const opcionesEstado = ESTADOS.map(
-    (e) => `<option value="${e}" ${e === (o.estado_reparacion || ESTADOS[0]) ? "selected" : ""}>${e}</option>`
+  const listaEstados = estadosPara(o);
+  const opcionesEstado = listaEstados.map(
+    (e) => `<option value="${e}" ${e === (o.estado_reparacion || listaEstados[0]) ? "selected" : ""}>${e}</option>`
   ).join("");
   const fechaCreacion = o.created_at ? new Date(o.created_at).toLocaleString() : "—";
 
@@ -375,6 +437,11 @@ async function guardarFlujo(event) {
   Object.assign(ordenSeleccionada, cambios);
   const idx = ordenes.findIndex((o) => o.id === ordenSeleccionada.id);
   if (idx !== -1) ordenes[idx] = ordenSeleccionada;
+
+  if (!esVisibleEnEstaVista(ordenSeleccionada)) {
+    cerrarDetalle(`Cambios guardados. Esta orden ahora está en el ${destinoDe(ordenSeleccionada)}.`);
+    return;
+  }
 
   status.textContent = "Cambios guardados.";
   status.className = "status-msg ok";

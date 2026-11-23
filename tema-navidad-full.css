@@ -1,0 +1,137 @@
+/* =========================================================
+   NAVIDAD COMPLETA — extra opcional del tema "navidad"
+   Agrega: luces parpadeando arriba, nieve cayendo, nieve
+   acumulada abajo, rayas de bastón navideño en los paneles,
+   adornos en los títulos y botones rojos.
+   Solo se carga cuando el tema activo es "navidad".
+   Para quitarlo: borra este archivo y tema-navidad-full.js
+   del repositorio (el tema navideño sencillo se queda).
+   ========================================================= */
+
+/* El botón del menú baja un poco para no chocar con las luces */
+body.tema-navidad .menu-btn{top:36px;}
+body.tema-navidad.tiene-menu .orders{padding-top:92px;}
+body.tema-navidad.tiene-menu .page{padding-top:104px;}
+body.tema-navidad.tiene-menu .ticket{margin-top:60px;}
+
+/* ---------- Luces ---------- */
+.navidad-luces{
+  position:fixed;
+  top:0;left:0;right:0;
+  height:32px;
+  z-index:9991;
+  pointer-events:none;
+  display:flex;
+  justify-content:space-between;
+  padding:0 6px;
+  overflow:hidden;
+}
+.navidad-luces::before{
+  content:"";
+  position:absolute;
+  top:3px;left:0;right:0;
+  height:2px;
+  background:#2b2b2b;
+}
+.navidad-luces span{
+  position:relative;
+  display:block;
+  width:12px;
+  height:18px;
+  margin-top:6px;
+  border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;
+  background:var(--c,#e53935);
+  box-shadow:0 0 10px 3px var(--c,#e53935);
+  animation:navidad-brillo 1.8s ease-in-out infinite;
+}
+.navidad-luces span::before{
+  content:"";
+  position:absolute;
+  top:-6px;left:3px;
+  width:6px;height:6px;
+  background:#2b2b2b;
+  border-radius:1px;
+}
+@keyframes navidad-brillo{
+  0%,100%{opacity:1;filter:brightness(1.15);}
+  50%{opacity:.35;filter:brightness(.7);}
+}
+
+/* ---------- Nieve cayendo ---------- */
+.navidad-copo{
+  position:fixed;
+  top:-24px;
+  z-index:9990;
+  color:#e8f6ff;
+  text-shadow:0 0 4px rgba(30,90,150,.75);
+  pointer-events:none;
+  user-select:none;
+  animation:navidad-caer linear infinite;
+}
+@keyframes navidad-caer{
+  0%{transform:translate3d(0,-24px,0) rotate(0deg);opacity:0;}
+  8%{opacity:.95;}
+  100%{transform:translate3d(var(--dx,30px),108vh,0) rotate(300deg);opacity:.9;}
+}
+
+/* ---------- Nieve acumulada abajo ---------- */
+.navidad-suelo{
+  position:fixed;
+  left:0;right:0;bottom:0;
+  height:18px;
+  z-index:9990;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 10px 0, #fff 9px, transparent 10px) repeat-x,
+    linear-gradient(#fff,#fff) bottom / 100% 8px no-repeat;
+  background-size:20px 14px, 100% 8px;
+  filter:drop-shadow(0 -2px 3px rgba(30,90,150,.25));
+}
+
+/* ---------- Paneles y tarjetas ---------- */
+body.tema-navidad .orders,
+body.tema-navidad .ticket__stub{
+  background-image:repeating-linear-gradient(
+    135deg,
+    rgba(255,255,255,.045) 0 14px,
+    transparent 14px 28px
+  );
+}
+body.tema-navidad .panel-section,
+body.tema-navidad .client-strip,
+body.tema-navidad .kpi-card,
+body.tema-navidad .section{
+  border-top:3px solid #c0392b;
+}
+body.tema-navidad .section{
+  border-top-width:0;
+}
+body.tema-navidad .menu-drawer{
+  background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.045) 0 14px,transparent 14px 28px);
+}
+
+/* ---------- Adornos en títulos ---------- */
+body.tema-navidad .detail__head h2::before{content:"🎁 ";}
+body.tema-navidad .section__head h2::before{content:"🎄 ";}
+body.tema-navidad .panel-section h3::before{content:"⭐ ";}
+body.tema-navidad .modal-exito__content h2::after{content:" 🎄✨";}
+
+/* ---------- Botones navideños ---------- */
+body.tema-navidad .btn-primary,
+body.tema-navidad button#btnSubmit{
+  background:linear-gradient(135deg,#d63a2b,#9d2a1f);
+  color:#fff;
+}
+body.tema-navidad .btn-primary:hover,
+body.tema-navidad button#btnSubmit:hover{
+  background:linear-gradient(135deg,#e34a3b,#b0322a);
+}
+body.tema-navidad .menu-item.is-current{
+  background:linear-gradient(135deg,#d63a2b,#9d2a1f);
+}
+
+/* ---------- Accesibilidad: sin movimiento si el usuario lo prefiere ---------- */
+@media (prefers-reduced-motion: reduce){
+  .navidad-copo{display:none;}
+  .navidad-luces span{animation:none;}
+}

@@ -23,12 +23,12 @@ document.getElementById("btnCerrarSesion")?.addEventListener("click", () => {
      proceso (esa página activa window.PANEL_SOLO_IMPRESORAS).
    - Panel de entregados (panel-entregados.html): todos los equipos ya
      entregados (esa página activa window.PANEL_ENTREGADOS).
-   Si quieres que el Panel de taller NO muestre impresoras (porque ya
-   se manejan en su panel), cambia el false por true.
+   El Panel de taller NO muestra impresoras (se manejan en su panel).
+   Si algún día quieres que vuelvan a salir aquí, cambia el true por false.
 --------------------------------------------------------- */
 const SOLO_IMPRESORAS = window.PANEL_SOLO_IMPRESORAS === true;
 const SOLO_ENTREGADOS = window.PANEL_ENTREGADOS === true;
-const OCULTAR_IMPRESORAS_EN_TALLER = false;
+const OCULTAR_IMPRESORAS_EN_TALLER = true;
 const ESTADO_ENTREGADO = "Entregado";
 
 /* ¿Esta orden se muestra en la pantalla actual? */
@@ -46,7 +46,7 @@ function esVisibleEnEstaVista(o) {
 function destinoDe(o) {
   if ((o.estado_reparacion || "") === ESTADO_ENTREGADO) return "Panel de entregados";
   const esImpresora = (o.tipo_equipo || "") === "Impresora";
-  if (esImpresora && (SOLO_ENTREGADOS || OCULTAR_IMPRESORAS_EN_TALLER)) return "Panel de impresoras";
+  if (esImpresora && !SOLO_IMPRESORAS && (SOLO_ENTREGADOS || OCULTAR_IMPRESORAS_EN_TALLER)) return "Panel de impresoras";
   return "Panel de taller";
 }
 
